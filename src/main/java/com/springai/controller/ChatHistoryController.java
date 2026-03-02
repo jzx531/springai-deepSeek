@@ -5,6 +5,7 @@ import com.springai.entity.vo.MessageVO;
 //import com.springai.enums.ChatType;
 import com.springai.entity.vo.MessageVO;
 import com.springai.repository.ChatHistoryRepository;
+import com.springai.service.ChatIdService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
@@ -30,9 +31,17 @@ public class ChatHistoryController {
 
     private final ChatMemory chatMemory;
 
+    private final ChatIdService chatIdService;
+    /*
     @GetMapping("/{type}")
     public Object getChatIds(@PathVariable("type") String type){
         return chatHistoryRepository.getChatIds(type);
+    }
+*/
+    //使用mysql
+    @GetMapping("/{type}")
+    public Object getChatIds(@PathVariable("type") String type){
+        return chatIdService.getChatIds(type);
     }
 
     @GetMapping("/{type}/{chatId}")

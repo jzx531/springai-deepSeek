@@ -2,6 +2,8 @@ package com.springai.controller;
 
 
 //import com.springai.repository.ChatHistoryRepository;
+import com.springai.repository.ChatHistoryRepository;
+import com.springai.service.ChatIdService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.model.Media;
@@ -25,6 +27,10 @@ public class ChatController {
 
     private final ChatClient chatClient;
 
+    private final ChatHistoryRepository chatHistoryRepository;
+
+    private final ChatIdService  chatIdService;
+
     /* //阻塞式调用
     @RequestMapping("/chat")
     public String chat(@RequestParam("prompt") String  prompt){
@@ -36,6 +42,10 @@ public class ChatController {
 
     @RequestMapping(value = "/chat",produces = "text/html;charset=utf-8")
     public Flux<String> chat(@RequestParam("prompt") String  prompt,@RequestParam("chatId") String  chatId){
+        //保存会话id
+        chatHistoryRepository.save("chat",chatId);
+        chatIdService.save("chat",chatId);
+
         return chatClient.prompt()
                 .user(prompt)
                 .advisors(a->a.param(CHAT_MEMORY_CONVERSATION_ID_KEY,chatId))
