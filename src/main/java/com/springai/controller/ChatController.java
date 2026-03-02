@@ -35,9 +35,10 @@ public class ChatController {
     }*/
 
     @RequestMapping(value = "/chat",produces = "text/html;charset=utf-8")
-    public Flux<String> chat(@RequestParam("prompt") String  prompt){
+    public Flux<String> chat(@RequestParam("prompt") String  prompt,@RequestParam("chatId") String  chatId){
         return chatClient.prompt()
                 .user(prompt)
+                .advisors(a->a.param(CHAT_MEMORY_CONVERSATION_ID_KEY,chatId))
                 .stream()
                 .content();
     }

@@ -39,10 +39,6 @@ import java.util.*;
 @Configuration
 public class CommonConfiguration {
 
-    @Bean
-    public ChatMemory chatMemory(){
-        return new InMemoryChatMemory();
-    }
 
     @Bean
     public VectorStore vectorStore(OpenAiEmbeddingModel embeddingModel){
@@ -51,12 +47,20 @@ public class CommonConfiguration {
 
     /* //首先使用ollama模型进行测试*/
     @Bean
-    public ChatClient chatClient(OllamaChatModel model){
+    public ChatClient chatClient(OllamaChatModel model,ChatMemory chatMemory){
         return ChatClient
                 .builder(model)
                 .defaultSystem("你是可爱的助手，名字叫小团团")
-                .defaultAdvisors(new SimpleLoggerAdvisor())//配置日志advisor
+                .defaultAdvisors(
+                        new SimpleLoggerAdvisor(),
+                        new MessageChatMemoryAdvisor(chatMemory)
+                )//配置日志advisor
                 .build();
+    }
+
+    @Bean
+    public ChatMemory chatMemory(){
+        return new InMemoryChatMemory();
     }
 
     /*
