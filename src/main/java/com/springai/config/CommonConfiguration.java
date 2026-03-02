@@ -1,6 +1,6 @@
 package com.springai.config;
 
-//import com.springai.constants.SystemConstants;
+import com.springai.constants.SystemConstants;
 //import com.springai.model.AlibabaOpenAiChatModel;
 //import com.springai.tools.CourseTools;
 
@@ -44,6 +44,11 @@ public class CommonConfiguration {
     public VectorStore vectorStore(OpenAiEmbeddingModel embeddingModel){
         return SimpleVectorStore.builder(embeddingModel).build();
     }
+    @Bean
+    public ChatMemory chatMemory(){
+        return new InMemoryChatMemory();
+    }
+
 
     /* //首先使用ollama模型进行测试*/
     @Bean
@@ -58,11 +63,18 @@ public class CommonConfiguration {
                 .build();
     }
 
+    /* //首先使用openai+Ali模型进行测试*/
     @Bean
-    public ChatMemory chatMemory(){
-        return new InMemoryChatMemory();
+    public ChatClient gameChatClient(OpenAiChatModel model,ChatMemory chatMemory){
+        return ChatClient
+                .builder(model)
+                .defaultSystem(SystemConstants.GAME_SYSTEM_PROMPT)
+                .defaultAdvisors(
+                        new SimpleLoggerAdvisor(),
+                        new MessageChatMemoryAdvisor(chatMemory)
+                )//配置日志advisor
+                .build();
     }
-
     /*
     @Bean
     public ChatClient chatClient(AlibabaOpenAiChatModel model,ChatMemory chatMemory)
