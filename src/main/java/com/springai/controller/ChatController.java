@@ -40,6 +40,7 @@ public class ChatController {
                 .content();
     }*/
 
+    /*
     @RequestMapping(value = "/chat",produces = "text/html;charset=utf-8")
     public Flux<String> chat(@RequestParam("prompt") String  prompt,@RequestParam("chatId") String  chatId){
         //保存会话id
@@ -51,6 +52,49 @@ public class ChatController {
                 .advisors(a->a.param(CHAT_MEMORY_CONVERSATION_ID_KEY,chatId))
                 .stream()
                 .content();
+    }*/
+
+    /**
+     * 增加多模态
+     * @param prompt
+     * @param chatId
+     * @param files
+     * @return
+     */
+    @RequestMapping(value = "/chat",produces = "text/html;charset=utf-8")
+    public Flux<String> chat(@RequestParam("prompt") String  prompt,@RequestParam("chatId") String  chatId,
+            @RequestParam(value = "files",required = false)List<MultipartFile>files){
+        //保存会话id
+        chatHistoryRepository.save("chat",chatId);
+        chatIdService.save("chat",chatId);
+
+//        2.判断输入
+        if(files==null ||files.isEmpty()){
+            //没有附件
+            return textChat(prompt,chatId);
+        }else{
+            return multiModelChat(prompt,chatId,files);
+        }
     }
 
+    private Flux<String> textChat(String prompt,String chatId)
+    {
+        return chatClient.prompt()
+                .user(prompt)
+                .advisors(a->a.param(CHAT_MEMORY_CONVERSATION_ID_KEY,chatId))
+                .stream()
+                .content();
+    }
+
+    private Flux<String> multiModelChat(String prompt,String chatId,List<MultipartFile>files){
+//        1.解析多媒体
+        List<Media> medias = files.stream()
+                .map(file->new Media(MimeType.valueOf(Objects.requireNonNull(file.getContentType())),file.getResource())).toList();
+//        2.请求模型
+        return chatClient.prompt()
+                .user(p->p.text(prompt).media(medias.toArray(Media[]::new)))
+                .advisors(a->a.param(CHAT_MEMORY_CONVERSATION_ID_KEY,chatId))
+                .stream()
+                .content();
+    }
 }

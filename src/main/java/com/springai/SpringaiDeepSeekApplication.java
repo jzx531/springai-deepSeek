@@ -14,8 +14,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 //        OllamaAutoConfiguration.class  // 【新增】排除 Ollama 自动配置 (可选，防止类似报错)
 //})
 @MapperScan("com.springai.mapper")
-
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.springai"})
 public class SpringaiDeepSeekApplication {
 
     public static void main(String[] args) {
